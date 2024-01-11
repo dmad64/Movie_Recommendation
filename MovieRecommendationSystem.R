@@ -1,11 +1,9 @@
-# In our Data Science project, we will make use of these four packages
+# For this project, we will use these four packages
 library(recommenderlab)
 library(ggplot2)                       
 library(data.table)
 library(reshape2)
-# We will now retrieve our data from movies.csv into movie_data dataframe and 
-# ratings.csv into rating_data. We will use the str() function to display 
-# information about the movie_data dataframe.
+# Retrieve data from movie_data dataframe and atings.csv into rating_data. 
 movie_data <- read.csv("movies.csv",stringsAsFactors=FALSE)
 rating_data <- read.csv("ratings.csv")
 str(movie_data)
@@ -14,10 +12,7 @@ head(movie_data)
 str(rating_data)
 summary(rating_data)
 head(rating_data)
-# From the above table, we observe that the userId column, as well as the 
-# movieId column, consist of integers. Furthermore, we need to convert the 
-# genres present in the movie_data dataframe into a more usable format by the 
-# users. 
+# Convert genres present in movie_data dataframe so that it is more usable. 
 movie_genre <- as.data.frame(movie_data$genres, stringsAsFactors=FALSE)
 library(data.table)
 movie_genre2 <- as.data.frame(tstrsplit(movie_genre[,1], '[|]', 
@@ -40,51 +35,41 @@ for (index in 1:nrow(movie_genre2)) {
   }
 }
 genre_mat2 <- as.data.frame(genre_mat1[-1,], stringsAsFactors=FALSE) 
-#remove first row, which was the genre list
 for (col in 1:ncol(genre_mat2)) {
   genre_mat2[,col] <- as.integer(genre_mat2[,col]) 
-  #convert from characters to integers
 } 
 str(genre_mat2)
-# In the next step of Data Pre-processing of R project, we will create a 
-# ‘search matrix’ that will allow us to perform an easy search of the films by 
-# specifying the genre present in our list.
+# Create a ‘search matrix’ that searches the films by specific genre.  
 SearchMatrix <- cbind(movie_data[,1:2], genre_mat2[])
 head(SearchMatrix)    
-# For our movie recommendation system to make sense of our ratings 
-# through recommenderlabs, we have to convert our matrix into a sparse matrix 
-# one. This new matrix is of the class ‘realRatingMatrix’.
+# Convert  matrix into a sparse matrix: ‘realRatingMatrix’.
 ratingMatrix <- dcast(rating_data, userId~movieId, value.var = "rating", na.rm=FALSE)
-ratingMatrix <- as.matrix(ratingMatrix[,-1]) #remove userIds
-# Convert rating matrix into a recommenderlab sparse matrix
+ratingMatrix <- as.matrix(ratingMatrix[,-1]) 
+# Convert rating matrix into a sparse matrix
 ratingMatrix <- as(ratingMatrix, "realRatingMatrix")
 ratingMatrix
 recommendation_model <- recommenderRegistry$get_entries(dataType = "realRatingMatrix")
 names(recommendation_model)
 lapply(recommendation_model, "[[", "description")
-# We will implement a single model in our R project – Item Based Collaborative 
-# Filtering.
+# Item Based Collaborative Filtering.
 recommendation_model$IBCF_realRatingMatrix$parameters
-# Collaborative Filtering involves suggesting movies to the users that are 
-# based on collecting preferences from many other users. With the help of 
-# recommenderlab, we can compute similarities using various operators like 
-# cosine, pearson as well as jaccard.
+# Collaborative Filtering suggesting movies that are based on the preferences of other users. 
+# Compute similarities using operators (cosine, pearson, jaccard.)
 similarity_mat <- similarity(ratingMatrix[1:4, ],
                              method = "cosine",
                              which = "users")
 as.matrix(similarity_mat)
 
 image(as.matrix(similarity_mat), main = "User's Similarities")
-# Delineate the similarity that is shared between the films
 movie_similarity <- similarity(ratingMatrix[, 1:4], method =
                                  "cosine", which = "items")
 as.matrix(movie_similarity)
 
 image(as.matrix(movie_similarity), main = "Movies similarity")
-# Extract the most unique ratings –
+# Most unique ratings –
 rating_values <- as.vector(ratingMatrix@data)
-unique(rating_values) # extracting unique ratings
-Table_of_Ratings <- table(rating_values) # creating a count of movie ratings
+unique(rating_values) 
+Table_of_Ratings <- table(rating_values) 
 Table_of_Ratings
 # Explore the most viewed movies in our dataset - visualisation. 
 movie_views <- colCounts(ratingMatrix) # count views for each movie
