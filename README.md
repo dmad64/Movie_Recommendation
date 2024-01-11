@@ -1,2 +1,2 @@
 # Movie system
-This project uses four existing libraries. It then retrives data, makes it more usable, 
+This project uses four existing libraries. It then retrives data, makes it more usable, creates a matrix, uses a collaborative filtering system, and also visualisation for various different conditons using the datasets. The ultimate goal is to create a program that allows users to get more streamlined movie recommendations, based on other user preferences, and popular engagement metrics.
